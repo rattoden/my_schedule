@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>Моё расписание</title>
+<style>
+:root{--bg:#f3f5fa;--card:#fff;--text:#182033;--muted:#758097;--line:#e8ebf2;--blue:#4169e1;--shadow:0 8px 26px rgba(30,45,85,.07)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+header{background:linear-gradient(135deg,#111827,#253c70);color:#fff;padding:23px 18px 20px;border-radius:0 0 26px 26px}.top{max-width:720px;margin:auto}.eyebrow{font-size:11px;letter-spacing:.14em;color:#b7c6ee;font-weight:800}.headrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:7px}h1{font-size:27px;margin:0;font-weight:800;letter-spacing:-.04em}.year{color:#cbd5e1;font-size:13px;margin-top:5px}.weekpill{white-space:nowrap;border:1px solid #61749b;background:#ffffff12;border-radius:14px;padding:9px 11px;font-size:12px;font-weight:700}
+main{max-width:720px;margin:auto;padding:15px 0 32px}.range{display:flex;justify-content:space-between;align-items:center;padding:0 17px 11px;color:var(--muted);font-size:12px}.date{font-weight:800;color:#35415b}.date-strip{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:2px 16px 14px;scroll-snap-type:x mandatory}.date-strip::-webkit-scrollbar{display:none}.date-btn{flex:0 0 58px;min-height:75px;border:1px solid #e7eaf2;background:#fff;border-radius:17px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;color:#657087;scroll-snap-align:center;cursor:pointer;font:inherit;-webkit-tap-highlight-color:transparent}.date-btn .dow{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}.date-btn .num{font-size:19px;line-height:1;font-weight:800;color:#26334d}.date-btn .month{font-size:10px;color:#929bad}.date-btn.selected{background:#4169e1;border-color:#4169e1;box-shadow:0 7px 16px #4169e13b}.date-btn.selected .dow,.date-btn.selected .num,.date-btn.selected .month{color:#fff}.date-btn.today:not(.selected){border-color:#4169e1}.selected-day{padding:0 14px}.day{background:var(--card);border:1px solid #edf0f5;border-radius:21px;overflow:hidden;box-shadow:var(--shadow);min-height:150px}.dayhead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 16px 14px;border-bottom:1px solid var(--line)}.daytitle{font-size:17px;font-weight:800}.daytitle small{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-top:4px}.today{font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:#fff;background:var(--blue);padding:6px 8px;border-radius:8px;white-space:nowrap}.empty{padding:27px 16px;color:#9aa3b4;font-size:13px;text-align:center}.lesson{display:grid;grid-template-columns:55px 4px minmax(0,1fr);gap:11px;padding:16px 15px 17px}.lesson+.lesson{border-top:1px solid #f0f2f7}.time{font-size:14px;font-weight:800;color:#3458be;padding-top:2px;white-space:nowrap}.rail{border-radius:10px;background:var(--accent);min-height:100%}.name{font-size:15px;line-height:1.38;font-weight:800;letter-spacing:-.015em}.type{display:inline-block;margin-top:8px;background:var(--tagbg);color:var(--accent);font-size:10px;font-weight:800;padding:5px 8px;border-radius:7px}.meta{display:flex;align-items:flex-start;gap:7px;margin-top:9px;color:#68748b;font-size:12px;line-height:1.4}.ico{width:14px;flex:0 0 14px;text-align:center;color:#8994a8}.footer{text-align:center;color:#a1a9b8;font-size:11px;padding:15px 16px 0}
+@media(min-width:600px){header{padding-top:30px}main{padding-top:20px}.date-strip{padding-left:max(16px,calc((100vw - 688px)/2));padding-right:max(16px,calc((100vw - 688px)/2))}.lesson{grid-template-columns:65px 4px minmax(0,1fr);padding:18px 19px}.dayhead{padding:18px 20px}.name{font-size:16px}.selected-day{padding:0 18px}}
+</style>
+</head>
+<body>
+<header><div class="top">
+  <div class="eyebrow">ЛИЧНОЕ РАСПИСАНИЕ</div>
+  <div class="headrow"><div><h1>Мои пары</h1><div class="year">Осенний семестр · 2026</div></div><div class="weekpill" id="weekpill">Нечётная неделя</div></div>
+</div></header>
+<main>
+  <div class="range"><span>Выбери день</span><span class="date">13 окт — 31 дек</span></div>
+  <div class="date-strip" id="date-strip" aria-label="Даты расписания"></div>
+  <div class="selected-day" id="selected-day"></div>
+  <div class="footer">Листай даты по горизонтали и выбирай день — остальные пары скрыты</div>
+</main>
+<script>
+const lessons = [
+{dates:["2026-11-02","2026-11-30"],time:"08:00",name:"Методы искусственного интеллекта",type:"Лабораторная",building:"7",room:"343",teacher:"Колобова Дарья Алексеевна",color:"#a855f7"},
+{dates:["2026-11-02","2026-11-30"],time:"09:40",name:"Методы искусственного интеллекта",type:"Лабораторная",building:"7",room:"343",teacher:"Колобова Дарья Алексеевна",color:"#a855f7"},
+{dates:["2026-10-26","2026-11-09","2026-11-23","2026-12-07","2026-12-21"],time:"15:10",name:"Корпоративные информационные системы",type:"Лабораторная",building:"7",room:"347",teacher:"Эминов Фарид Ибрагимович",color:"#8b5cf6"},
+{dates:["2026-10-26","2026-11-09","2026-11-23","2026-12-07","2026-12-21"],time:"16:50",name:"Корпоративные информационные системы",type:"Лабораторная",building:"7",room:"347",teacher:"Эминов Фарид Ибрагимович",color:"#8b5cf6"},
+{dates:["2026-10-13","2026-11-10","2026-12-08"],time:"13:30",name:"Программное обеспечение мобильных устройств",type:"Лабораторная",building:"7",room:"341",teacher:"Вафин Радик Рашитович",color:"#0ea5e9"},
+{dates:["2026-10-13","2026-11-10","2026-12-08"],time:"15:10",name:"Программное обеспечение мобильных устройств",type:"Лабораторная",building:"7",room:"341",teacher:"Вафин Радик Рашитович",color:"#0ea5e9"},
+{dates:["2026-10-14","2026-10-28","2026-11-11","2026-11-25","2026-12-09"],time:"08:00",name:"Представление и обработка знаний в информационных системах",type:"Лабораторная",building:"7",room:"355",teacher:"Колобова Дарья Алексеевна",color:"#ec4899"},
+{dates:["2026-10-21","2026-11-18","2026-12-02","2026-12-16","2026-12-30"],time:"08:00",name:"Геоинформационные системы",type:"Лабораторная",building:"7",room:"351",teacher:"Осипова Мария Сергеевна",color:"#14b8a6"},
+{dates:["2026-10-14","2026-10-28","2026-11-11","2026-11-25","2026-12-09"],time:"09:40",name:"Представление и обработка знаний в информационных системах",type:"Лабораторная",building:"7",room:"355",teacher:"Колобова Дарья Алексеевна",color:"#ec4899"},
+{dates:["2026-10-21","2026-11-18","2026-12-02","2026-12-16","2026-12-30"],time:"09:40",name:"Геоинформационные системы",type:"Лабораторная",building:"7",room:"351",teacher:"Осипова Мария Сергеевна",color:"#14b8a6"},
+{dates:["2026-10-22","2026-11-05","2026-11-19","2026-12-03","2026-12-17"],time:"09:40",name:"Теория языков программирования",type:"Лабораторная",building:"7",room:"353",teacher:"Гаптуллазянoва Гульшат Ильдусовна",color:"#f59e0b"},
+{dates:["2026-10-22","2026-11-05","2026-11-19","2026-12-03","2026-12-17"],time:"11:20",name:"Теория языков программирования",type:"Лабораторная",building:"7",room:"353",teacher:"Гаптуллазянoва Гульшат Ильдусовна",color:"#f59e0b"},
+{dates:["2026-10-15","2026-10-29","2026-11-12","2026-11-26","2026-12-10"],time:"13:30",name:"Представление и обработка знаний в информационных системах",type:"Лекция",building:"7",room:"509",teacher:"Сытник Анатолий Сергеевич",color:"#ec4899"},
+{dates:["2026-10-22","2026-11-05","2026-11-19","2026-12-03","2026-12-17"],time:"13:30",name:"Теория языков программирования",type:"Лекция",building:"7",room:"509",teacher:"Барков Игорь Александрович",color:"#f59e0b"},
+{dates:["2026-10-15","2026-10-29","2026-11-12","2026-11-26","2026-12-10"],time:"15:10",name:"Методы и средства проектирования информационных систем и технологий",type:"Лекция",building:"7",room:"355",teacher:"Осипова Алла Леонидовна",color:"#6366f1"},
+{dates:["2026-10-15","2026-10-29","2026-11-12","2026-11-26","2026-12-10"],time:"16:50",name:"Программное обеспечение мобильных устройств",type:"Лекция",building:"7",room:"533",teacher:"Вафин Радик Рашитович",color:"#0ea5e9"},
+{dates:["2026-10-16","2026-10-30","2026-11-13","2026-11-27","2026-12-11"],time:"08:00",name:"Управление ИТ-проектами",type:"Лекция",building:"7",room:"409",teacher:"Зарайский Сергей Александрович",color:"#64748b"},
+{dates:["2026-10-16","2026-10-30","2026-11-13","2026-11-27","2026-12-11"],time:"09:40",name:"Геоинформационные системы",type:"Лекция",building:"7",room:"409",teacher:"Осипова Мария Сергеевна",color:"#14b8a6"},
+{dates:["2026-10-16","2026-10-30","2026-11-13","2026-11-27","2026-12-11"],time:"11:20",name:"Инструментальные средства информационных систем",type:"Лабораторная",building:"7",room:"345",teacher:"Зарайский Сергей Александрович",color:"#64748b"},
+{dates:["2026-10-23","2026-11-06","2026-11-20","2026-12-04","2026-12-18"],time:"11:20",name:"Управление ИТ-проектами",type:"Лабораторная",building:"7",room:"345",teacher:"Зарайский Сергей Александрович",color:"#64748b"},
+{dates:["2026-10-16","2026-10-30","2026-11-13","2026-11-27","2026-12-11"],time:"13:30",name:"Инструментальные средства информационных систем",type:"Лабораторная",building:"7",room:"345",teacher:"Зарайский Сергей Александрович",color:"#64748b"},
+{dates:["2026-10-23","2026-11-06","2026-11-20","2026-12-04","2026-12-18"],time:"13:30",name:"Управление ИТ-проектами",type:"Лабораторная",building:"7",room:"345",teacher:"Зарайский Сергей Александрович",color:"#64748b"},
+{dates:["2026-10-23","2026-11-06","2026-11-20","2026-12-04","2026-12-18"],time:"15:10",name:"Инструментальные средства информационных систем",type:"Лекция",building:"7",room:"509",teacher:"Зарайский Сергей Александрович",color:"#64748b"},
+{dates:["2026-10-23","2026-11-06","2026-11-20","2026-12-04","2026-12-18"],time:"16:50",name:"Методы искусственного интеллекта",type:"Лекция",building:"7",room:"509",teacher:"Сытник Анатолий Сергеевич",color:"#a855f7"},
+{dates:["2026-10-17","2026-10-31","2026-11-14","2026-11-28","2026-12-12"],time:"09:40",name:"Информационные системы реального времени",type:"Лабораторная",building:"7",room:"343",teacher:"Валов Олег Павлович",color:"#ef4444"},
+{dates:["2026-10-17","2026-10-31","2026-11-14","2026-11-28","2026-12-12"],time:"11:20",name:"Информационные системы реального времени",type:"Лабораторная",building:"7",room:"343",teacher:"Валов Олег Павлович",color:"#ef4444"},
+{dates:["2026-10-24","2026-11-07","2026-11-21","2026-12-05","2026-12-19"],time:"11:20",name:"Информационные системы реального времени",type:"Практика",building:"7",room:"343",teacher:"Валов Олег Павлович",color:"#ef4444"},
+{dates:["2026-10-24","2026-11-07","2026-11-21","2026-12-05","2026-12-19"],time:"13:30",name:"Корпоративные информационные системы",type:"Лекция",building:"7",room:"509",teacher:"Эминов Фарид Ибрагимович",color:"#8b5cf6"},
+{dates:["2026-10-17","2026-10-31","2026-11-14","2026-11-28","2026-12-12"],time:"13:30",name:"Информационные системы реального времени",type:"Лекция",building:"7",room:"403",teacher:"Валов Олег Павлович",color:"#ef4444"},
+{dates:["2026-10-20","2026-10-27","2026-11-03","2026-11-10","2026-11-17","2026-11-24","2026-12-01","2026-12-08","2026-12-15","2026-12-22"],time:"11:20",name:"Физическая культура и спорт (элективная дисциплина)",type:"Практика",building:"КСК",room:"ОЛИМП4",teacher:"Преподаватель кафедры",color:"#22c55e"}
+];
+const now = new Date();
+const currentDate = new Date(now.getFullYear(),now.getMonth(),now.getDate());
+const start = new Date(currentDate); start.setDate(start.getDate()-7);
+const end = new Date(2026,11,31);
+const fmt = new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long'});
+const monthShort = new Intl.DateTimeFormat('ru-RU',{month:'short'});
+const weekdays = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+const weekdaysShort = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const oddWeekAnchor = new Date(2026,9,19); // неделя 19–25 октября указана как нечётная
+function isOddWeek(d){const monday=new Date(d.getFullYear(),d.getMonth(),d.getDate());monday.setDate(monday.getDate()-((monday.getDay()+6)%7));const diff=Math.round((monday-oddWeekAnchor)/604800000);return ((diff%2)+2)%2===0}
+const strip=document.getElementById('date-strip');
+const selectedDay=document.getElementById('selected-day');
+let selectedKey=iso(currentDate);
+function renderSelected(key){
+ selectedKey=key;
+ const d=new Date(key+'T12:00:00');
+ document.querySelectorAll('.date-btn').forEach(btn=>{const active=btn.dataset.date===key;btn.classList.toggle('selected',active);btn.setAttribute('aria-pressed',active?'true':'false')});
+ document.getElementById('weekpill').textContent=(isOddWeek(d)?'Нечётная':'Чётная')+' неделя';
+ const todays=lessons.filter(x=>x.dates.includes(key)).sort((a,b)=>a.time.localeCompare(b.time));
+ const section=document.createElement('section');section.className='day';
+ const head=document.createElement('div');head.className='dayhead';
+ const title=document.createElement('div');title.className='daytitle';title.textContent=weekdays[d.getDay()]+', '+fmt.format(d);
+ const subtitle=document.createElement('small');subtitle.textContent=(isOddWeek(d)?'Нечётная':'Чётная')+' неделя';title.appendChild(subtitle);
+ head.appendChild(title);
+ if(key===iso(currentDate)){const badge=document.createElement('span');badge.className='today';badge.textContent='Сегодня';head.appendChild(badge)}
+ section.appendChild(head);
+ if(!todays.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='В этот день занятий нет';section.appendChild(empty)}
+ todays.forEach(x=>{const item=document.createElement('div');item.className='lesson';item.style.setProperty('--accent',x.color);item.style.setProperty('--tagbg',x.color+'18');
+ const time=document.createElement('div');time.className='time';time.textContent=x.time;
+ const rail=document.createElement('div');rail.className='rail';
+ const content=document.createElement('div');const name=document.createElement('div');name.className='name';name.textContent=x.name;content.appendChild(name);
+ const type=document.createElement('span');type.className='type';type.textContent=x.type;content.appendChild(type);
+ const meta1=document.createElement('div');meta1.className='meta';meta1.innerHTML='<span class="ico">⌖</span><span></span>';meta1.lastElementChild.textContent=(x.building==='КСК'?'КСК':'Корпус '+x.building)+' · '+(x.room==='ОЛИМП4'?'ОЛИМП4':'ауд. '+x.room);
+ const meta2=document.createElement('div');meta2.className='meta';meta2.innerHTML='<span class="ico">♙</span><span></span>';meta2.lastElementChild.textContent=x.teacher;
+ content.append(meta1,meta2);item.append(time,rail,content);section.appendChild(item);
+ });
+ selectedDay.replaceChildren(section);
+}
+for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+ const key=iso(d);const btn=document.createElement('button');btn.type='button';btn.className='date-btn';btn.dataset.date=key;
+ if(key===iso(currentDate))btn.classList.add('today');
+ const dow=document.createElement('span');dow.className='dow';dow.textContent=weekdaysShort[d.getDay()];
+ const num=document.createElement('span');num.className='num';num.textContent=d.getDate();
+ const month=document.createElement('span');month.className='month';month.textContent=monthShort.format(d).replace('.','');
+ btn.append(dow,num,month);btn.addEventListener('click',()=>renderSelected(key));strip.appendChild(btn);
+}
+renderSelected(selectedKey);
+const todayButton=strip.querySelector(`[data-date="${selectedKey}"]`);
+if(todayButton)todayButton.scrollIntoView({block:'nearest',inline:'center',behavior:'auto'});
+</script>
+</body></html>
